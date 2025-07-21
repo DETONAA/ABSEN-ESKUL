@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Absensi Kelas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f0f4ff;
+      color: #1E3A8A;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #1E3A8A;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    input, select, button {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #1E3A8A;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #274ea3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background-color: #1E3A8A;
+      color: white;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    .green { color: green; }
+    .yellow { color: goldenrod; }
+    .red { color: red; }
+    .blue { color: steelblue; }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td {
+        border: none;
+        border-bottom: 1px solid #ddd;
+        position: relative;
+        padding-left: 50%;
+      }
+      td:before {
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: bold;
+      }
+      td:nth-of-type(1):before { content: "Tanggal"; }
+      td:nth-of-type(2):before { content: "Nama"; }
+      td:nth-of-type(3):before { content: "Status"; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Absensi Kelas</h1>
+    <form id="attendanceForm">
+      <input type="text" id="name" placeholder="Nama Lengkap" required />
+      <select id="status">
+        <option value="Hadir">Hadir</option>
+        <option value="Izin">Izin</option>
+        <option value="Alpha">Alpha</option>
+        <option value="Sakit">Sakit</option>
+      </select>
+      <button type="submit">Simpan</button>
+    </form>
+
+    <table id="attendanceTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Nama</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data absensi akan muncul di sini -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const form = document.getElementById('attendanceForm');
+    const nameInput = document.getElementById('name');
+    const statusInput = document.getElementById('status');
+    const tableBody = document.querySelector('#attendanceTable tbody');
+
+    function loadData() {
+      const data = JSON.parse(localStorage.getItem('absensi')) || [];
+      tableBody.innerHTML = '';
+      data.forEach(entry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entry.date}</td>
+          <td>${entry.name}</td>
+          <td class="${getColor(entry.status)}">${entry.status}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function getColor(status) {
+      switch (status) {
+        case 'Hadir': return 'green';
+        case 'Izin': return 'yellow';
+        case 'Alpha': return 'red';
+        case 'Sakit': return 'blue';
+        default: return '';
+      }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const status = statusInput.value;
+      const date = new Date().toISOString().split('T')[0];
+
+      if (!name) return;
+
+      const entry = { name, status, date };
+      const data = JSON.parse(localStorage.getItem('absensi')) || [];
+      data.push(entry);
+      localStorage.setItem('absensi', JSON.stringify(data));
+
+      nameInput.value = '';
+      statusInput.value = 'Hadir';
+      loadData();
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
